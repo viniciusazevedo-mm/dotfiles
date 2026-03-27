@@ -2,16 +2,16 @@
 # ─────────────────────────────────────────
 # zsh-boost.sh
 # Zsh + Oh My Zsh + Powerlevel10k setup
-# Author: Vinicius Azevedo<github.com/viniciusazevedo-mm>
+# Author: Vinicius Azevedo <github.com/viniciusazevedo-mm>
 # ─────────────────────────────────────────
 
 set -e
 
-echo "zsh-boost — configurando terminal..."
+echo "zsh-boost  configurando terminal..."
 
-# ─── Dependências ─────────────────────────────────────────
+# ─── Dependncias ─────────────────────────────────────────
 echo ""
-echo "Instalando dependências..."
+echo "Instalando dependncias..."
 sudo apt update -q
 sudo apt install -y zsh curl git unzip fontconfig
 
@@ -20,7 +20,7 @@ echo ""
 echo "Instalando Oh My Zsh..."
 
 if [ -d "$HOME/.oh-my-zsh" ]; then
-  echo "  Oh My Zsh já instalado, pulando..."
+  echo "  Oh My Zsh j instalado, pulando..."
 else
   RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 fi
@@ -32,7 +32,7 @@ echo ""
 echo "Instalando Powerlevel10k..."
 
 if [ -d "$ZSH_CUSTOM/themes/powerlevel10k" ]; then
-  echo "  Powerlevel10k já instalado, pulando..."
+  echo "  Powerlevel10k j instalado, pulando..."
 else
   git clone --depth=1 https://github.com/romkatv/powerlevel10k.git \
     "$ZSH_CUSTOM/themes/powerlevel10k"
@@ -44,7 +44,7 @@ echo "Instalando plugins..."
 
 # zsh-syntax-highlighting
 if [ -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ]; then
-  echo "  zsh-syntax-highlighting já instalado, pulando..."
+  echo "  zsh-syntax-highlighting j instalado, pulando..."
 else
   git clone https://github.com/zsh-users/zsh-syntax-highlighting.git \
     "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting"
@@ -52,7 +52,7 @@ fi
 
 # zsh-autosuggestions
 if [ -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions" ]; then
-  echo "  zsh-autosuggestions já instalado, pulando..."
+  echo "  zsh-autosuggestions j instalado, pulando..."
 else
   git clone https://github.com/zsh-users/zsh-autosuggestions.git \
     "$ZSH_CUSTOM/plugins/zsh-autosuggestions"
@@ -60,7 +60,7 @@ fi
 
 # zsh-completions
 if [ -d "$ZSH_CUSTOM/plugins/zsh-completions" ]; then
-  echo "  zsh-completions já instalado, pulando..."
+  echo "  zsh-completions j instalado, pulando..."
 else
   git clone https://github.com/zsh-users/zsh-completions.git \
     "$ZSH_CUSTOM/plugins/zsh-completions"
@@ -68,10 +68,10 @@ fi
 
 # ─── Ferramentas visuais ──────────────────────────────────
 echo ""
-echo "🛠  Instalando ferramentas..."
+echo "Instalando ferramentas..."
 sudo apt install -y btop
 
-# bat — no Ubuntu 24 já vem como bat
+# bat  no Ubuntu 24 j vem como bat
 sudo apt install -y bat 2>/dev/null || sudo apt install -y batcat
 # garante que o comando bat funciona
 if command -v batcat &>/dev/null && ! command -v bat &>/dev/null; then
@@ -79,7 +79,7 @@ if command -v batcat &>/dev/null && ! command -v bat &>/dev/null; then
   ln -sf /usr/bin/batcat ~/.local/bin/bat
 fi
 
-# lsd — não está no apt do Ubuntu 24, instala via .deb do GitHub
+# lsd  no est no apt do Ubuntu 24, instala via .deb do GitHub
 echo "  Instalando lsd..."
 LSD_VERSION=$(curl -s https://api.github.com/repos/lsd-rs/lsd/releases/latest | grep tag_name | cut -d'"' -f4)
 curl -fsSL "https://github.com/lsd-rs/lsd/releases/latest/download/lsd_${LSD_VERSION#v}_amd64.deb" \
@@ -87,7 +87,7 @@ curl -fsSL "https://github.com/lsd-rs/lsd/releases/latest/download/lsd_${LSD_VER
 sudo dpkg -i /tmp/lsd.deb
 rm /tmp/lsd.deb
 
-# fastfetch — PPA oficial
+# fastfetch  PPA oficial
 echo "  Instalando fastfetch..."
 sudo add-apt-repository -y ppa:zhangsongcui3371/fastfetch 2>/dev/null || true
 sudo apt update -q
@@ -101,7 +101,7 @@ FONT_DIR="$HOME/.local/share/fonts"
 mkdir -p "$FONT_DIR"
 
 if fc-list | grep -qi "JetBrainsMono"; then
-  echo "  JetBrainsMono já instalada, pulando..."
+  echo "  JetBrainsMono j instalada, pulando..."
 else
   TMP=$(mktemp -d)
   curl -fsSL https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip \
@@ -126,7 +126,7 @@ fi
 
 cat > "$ZSHRC" << 'EOF'
 # ─────────────────────────────────────────
-# .zshrc — gerado por zsh-boost.sh
+# .zshrc  gerado por zsh-boost.sh
 # ─────────────────────────────────────────
 
 # Powerlevel10k instant prompt
@@ -153,7 +153,7 @@ source $ZSH/oh-my-zsh.sh
 
 # ─── Aliases ──────────────────────────────────────────────
 
-# Navegação
+# Navegao
 alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
@@ -169,6 +169,11 @@ alias cat='bat'
 
 # top
 alias top='btop'
+
+# Git rpido
+alias g='git'
+alias gs='git s'
+alias gl='git l'
 
 # Sistema
 alias update='sudo apt update && sudo apt upgrade -y'
@@ -187,7 +192,7 @@ export EDITOR="nano"
 export PATH="$HOME/.local/bin:$PATH"
 export LANG=en_US.UTF-8
 
-# ─── Histórico ────────────────────────────────────────────
+# ─── Histrico ────────────────────────────────────────────
 HISTSIZE=10000
 SAVEHIST=10000
 setopt HIST_IGNORE_DUPS
@@ -201,33 +206,33 @@ ZSH_AUTOSUGGEST_STRATEGY=(history completion)
 # ─── Powerlevel10k config ─────────────────────────────────
 [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
 
-# ─── Fastfetch no início ──────────────────────────────────
+# ─── Fastfetch no incio ──────────────────────────────────
 # Descomenta pra mostrar info do sistema ao abrir o terminal
 # fastfetch
 EOF
 
-# ─── Shell padrão ─────────────────────────────────────────
+# ─── Shell padro ─────────────────────────────────────────
 echo ""
-echo "Definindo Zsh como shell padrão..."
-chsh -s $(which zsh)
+echo "Definindo Zsh como shell padro..."
+sudo usermod -s $(which zsh) $USER
 
 # ─── Summary ──────────────────────────────────────────────
 echo ""
 echo "zsh-boost instalado com sucesso!"
 echo ""
 echo "O que foi instalado:"
-echo "  + Zsh + Oh My Zsh"
-echo "  + Powerlevel10k (tema)"
-echo "  + zsh-syntax-highlighting"
-echo "  + zsh-autosuggestions"
-echo "  + zsh-completions"
-echo "  + btop, lsd, bat, fastfetch"
-echo "  + JetBrainsMono Nerd Font"
+echo "  Zsh + Oh My Zsh"
+echo "  Powerlevel10k (tema)"
+echo "  zsh-syntax-highlighting"
+echo "  zsh-autosuggestions"
+echo "  zsh-completions"
+echo "  btop, lsd, bat, fastfetch"
+echo "  JetBrainsMono Nerd Font"
 echo ""
-echo " Próximos passos:"
+echo "Prximos passos:"
 echo "  1. Configura a fonte 'JetBrainsMono Nerd Font' no seu terminal"
 echo "  2. Abre um novo terminal"
 echo "  3. Roda: p10k configure"
 echo ""
-echo "  Para ativar o fastfetch no início do terminal:"
+echo "  Para ativar o fastfetch no incio do terminal:"
 echo "  Descomenta a linha 'fastfetch' no final do ~/.zshrc"
