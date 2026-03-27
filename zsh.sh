@@ -211,9 +211,135 @@ ZSH_AUTOSUGGEST_STRATEGY=(history completion)
 # fastfetch
 EOF
 
-# ─── Shell padro ─────────────────────────────────────────
+# ─── Powerlevel10k hacker config ─────────────────────────
 echo ""
-echo "Definindo Zsh como shell padro..."
+echo "Aplicando tema hacker no Powerlevel10k..."
+
+# Backup se existir e sobrescreve
+[ -f "$HOME/.p10k.zsh" ] && cp "$HOME/.p10k.zsh" "$HOME/.p10k.zsh.backup.$(date +%Y%m%d%H%M%S)"
+
+cat > "$HOME/.p10k.zsh" << 'P10K'
+# Gerado por zsh-boost.sh — tema hacker
+
+'builtin' 'local' '-a' 'p10k_config_opts'
+[[ ! -o 'aliases'         ]] || p10k_config_opts+=('aliases')
+[[ ! -o 'sh_glob'         ]] || p10k_config_opts+=('sh_glob')
+[[ ! -o 'no_brace_expand' ]] || p10k_config_opts+=('no_brace_expand')
+'builtin' 'setopt' 'no_aliases' 'no_sh_glob' 'brace_expand'
+
+() {
+  emulate -L zsh -o extended_glob
+
+  unset -m '(POWERLEVEL9K_*|DEFAULT_USER)~POWERLEVEL9K_GITSTATUS_DIR'
+
+  autoload -Uz is-at-least && is-at-least 5.1 || return
+
+  # Segmentos da esquerda
+  typeset -g POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(
+    dir
+    vcs
+    newline
+    prompt_char
+  )
+
+  # Segmentos da direita
+  typeset -g POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(
+    status
+    command_execution_time
+    background_jobs
+    node_version
+    go_version
+    python_version
+    time
+  )
+
+  # Geral
+  typeset -g POWERLEVEL9K_MODE=nerdfont-complete
+  typeset -g POWERLEVEL9K_ICON_PADDING=moderate
+  typeset -g POWERLEVEL9K_BACKGROUND=                   # transparente
+  typeset -g POWERLEVEL9K_{LEFT,RIGHT}_{LEFT,RIGHT}_WHITESPACE=
+  typeset -g POWERLEVEL9K_{LEFT,RIGHT}_SUBSEGMENT_SEPARATOR=' '
+  typeset -g POWERLEVEL9K_{LEFT,RIGHT}_SEGMENT_SEPARATOR=
+  typeset -g POWERLEVEL9K_VISUAL_IDENTIFIER_EXPANSION=
+  typeset -g POWERLEVEL9K_PROMPT_ADD_NEWLINE=true
+
+  # Prompt char — verde se ok, vermelho se erro
+  typeset -g POWERLEVEL9K_PROMPT_CHAR_OK_{VIINS,VICMD,VIVIS,VIOWR}_FOREGROUND=076
+  typeset -g POWERLEVEL9K_PROMPT_CHAR_ERROR_{VIINS,VICMD,VIVIS,VIOWR}_FOREGROUND=196
+  typeset -g POWERLEVEL9K_PROMPT_CHAR_{OK,ERROR}_VIINS_CONTENT_EXPANSION='>'
+  typeset -g POWERLEVEL9K_PROMPT_CHAR_OVERWRITE_STATE=false
+
+  # Diretorio — verde neon
+  typeset -g POWERLEVEL9K_DIR_FOREGROUND=076
+  typeset -g POWERLEVEL9K_SHORTEN_STRATEGY=truncate_to_unique
+  typeset -g POWERLEVEL9K_SHORTEN_DELIMITER=
+  typeset -g POWERLEVEL9K_DIR_SHORTENED_FOREGROUND=040
+  typeset -g POWERLEVEL9K_DIR_ANCHOR_FOREGROUND=076
+  typeset -g POWERLEVEL9K_DIR_ANCHOR_BOLD=true
+
+  # Git — cores hacker
+  typeset -g POWERLEVEL9K_VCS_BRANCH_ICON=
+  typeset -g POWERLEVEL9K_VCS_UNTRACKED_ICON='?'
+  typeset -g POWERLEVEL9K_VCS_CLEAN_FOREGROUND=076
+  typeset -g POWERLEVEL9K_VCS_MODIFIED_FOREGROUND=220
+  typeset -g POWERLEVEL9K_VCS_UNTRACKED_FOREGROUND=196
+  typeset -g POWERLEVEL9K_VCS_CONFLICTED_FOREGROUND=196
+  typeset -g POWERLEVEL9K_VCS_LOADING_FOREGROUND=240
+
+  typeset -g POWERLEVEL9K_VCS_MAX_SYNC_LATENCY_SECONDS=0
+  typeset -g POWERLEVEL9K_VCS_{STAGED,UNSTAGED,UNTRACKED,CONFLICTED,COMMITS_AHEAD,COMMITS_BEHIND}_MAX_NUM=-1
+
+  typeset -g POWERLEVEL9K_VCS_VISUAL_IDENTIFIER_COLOR=076
+  typeset -g POWERLEVEL9K_VCS_BACKENDS=(git)
+
+  # Status
+  typeset -g POWERLEVEL9K_STATUS_EXTENDED_STATES=true
+  typeset -g POWERLEVEL9K_STATUS_OK=false
+  typeset -g POWERLEVEL9K_STATUS_OK_FOREGROUND=076
+  typeset -g POWERLEVEL9K_STATUS_ERROR_FOREGROUND=196
+  typeset -g POWERLEVEL9K_STATUS_ERROR_SIGNAL_FOREGROUND=196
+
+  # Tempo de execucao — so mostra se > 3s
+  typeset -g POWERLEVEL9K_COMMAND_EXECUTION_TIME_THRESHOLD=3
+  typeset -g POWERLEVEL9K_COMMAND_EXECUTION_TIME_FOREGROUND=101
+  typeset -g POWERLEVEL9K_COMMAND_EXECUTION_TIME_FORMAT='d h m s'
+
+  # Jobs em background
+  typeset -g POWERLEVEL9K_BACKGROUND_JOBS_VERBOSE=false
+  typeset -g POWERLEVEL9K_BACKGROUND_JOBS_FOREGROUND=076
+
+  # Node
+  typeset -g POWERLEVEL9K_NODE_VERSION_FOREGROUND=070
+  typeset -g POWERLEVEL9K_NODE_VERSION_PROJECT_ONLY=true
+
+  # Go
+  typeset -g POWERLEVEL9K_GO_VERSION_FOREGROUND=039
+  typeset -g POWERLEVEL9K_GO_VERSION_PROJECT_ONLY=true
+
+  # Python
+  typeset -g POWERLEVEL9K_PYTHON_VERSION_FOREGROUND=039
+  typeset -g POWERLEVEL9K_PYTHON_VERSION_PROJECT_ONLY=true
+
+  # Hora — discreta
+  typeset -g POWERLEVEL9K_TIME_FOREGROUND=240
+  typeset -g POWERLEVEL9K_TIME_FORMAT='%D{%H:%M}'
+  typeset -g POWERLEVEL9K_TIME_UPDATE_ON_COMMAND=false
+
+  # Instant prompt
+  typeset -g POWERLEVEL9K_INSTANT_PROMPT=verbose
+  typeset -g POWERLEVEL9K_DISABLE_HOT_RELOAD=true
+
+  (( ${#p10k_config_opts} )) && setopt ${p10k_config_opts[@]}
+} always {
+  'builtin' 'unset' 'p10k_config_opts'
+}
+P10K
+
+echo "  .p10k.zsh gerado!"
+
+# ─── Shell padrao ─────────────────────────────────────────
+echo ""
+echo "Definindo Zsh como shell padrao..."
 sudo usermod -s $(which zsh) $USER
 
 # ─── Summary ──────────────────────────────────────────────
@@ -221,18 +347,17 @@ echo ""
 echo "zsh-boost instalado com sucesso!"
 echo ""
 echo "O que foi instalado:"
-echo "  Zsh + Oh My Zsh"
-echo "  Powerlevel10k (tema)"
-echo "  zsh-syntax-highlighting"
-echo "  zsh-autosuggestions"
-echo "  zsh-completions"
-echo "  btop, lsd, bat, fastfetch"
-echo "  JetBrainsMono Nerd Font"
+echo "  - Zsh + Oh My Zsh"
+echo "  - Powerlevel10k (tema hacker pre-configurado)"
+echo "  - zsh-syntax-highlighting"
+echo "  - zsh-autosuggestions"
+echo "  - zsh-completions"
+echo "  - btop, lsd, bat, fastfetch"
+echo "  - JetBrainsMono Nerd Font"
 echo ""
-echo "Prximos passos:"
+echo "Proximos passos:"
 echo "  1. Configura a fonte 'JetBrainsMono Nerd Font' no seu terminal"
-echo "  2. Abre um novo terminal"
-echo "  3. Roda: p10k configure"
+echo "  2. Roda: exec zsh"
 echo ""
-echo "  Para ativar o fastfetch no incio do terminal:"
-echo "  Descomenta a linha 'fastfetch' no final do ~/.zshrc"
+echo "  Para ajustar o tema: p10k configure"
+echo "  Para ativar o fastfetch: descomenta a linha no final do ~/.zshrc"
