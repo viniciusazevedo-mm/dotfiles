@@ -1,0 +1,85 @@
+name: Bug Report
+description: Reportar um problema com algum script
+title: "[bug]: "
+labels: ["bug"]
+body:
+  - type: dropdown
+    id: script
+    attributes:
+      label: Script
+      description: Qual script tem o problema?
+      options:
+        - git-boost.sh
+        - zsh.sh
+        - neovim.sh
+        - tmux.sh
+        - docker.sh
+        - node.sh
+        - golang.sh
+        - rust.sh
+        - python.sh
+        - ssh-hardening.sh
+        - firewall.sh
+        - fail2ban.sh
+        - sysctl.sh
+        - network-tools.sh
+        - pentest.sh
+        - aliases-extra.sh
+        - security-audit.sh
+        - system-info.sh
+        - cleanup.sh
+        - backup.sh
+        - wsl.sh
+    validations:
+      required: true
+
+  - type: dropdown
+    id: distro
+    attributes:
+      label: Distro
+      options:
+        - Ubuntu 22.04
+        - Ubuntu 24.04
+        - Kali Linux
+        - Debian 12
+        - WSL2 (Ubuntu)
+        - Outra
+    validations:
+      required: true
+
+  - type: dropdown
+    id: arch
+    attributes:
+      label: Arquitetura
+      options:
+        - amd64 (x86_64)
+        - arm64 (aarch64)
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Descrição
+      description: O que aconteceu?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Como reproduzir
+      description: Passos para reproduzir o bug
+      value: |
+        1. Rodei `bash <(curl -fsSL ...)`
+        2. ...
+        3. Erro apareceu
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Output / Logs
+      description: Cole o output do erro aqui
+      render: bash

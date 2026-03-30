@@ -1,0 +1,38 @@
+name: Feature Request
+description: Sugerir um novo script ou melhoria
+title: "[feature]: "
+labels: ["enhancement"]
+body:
+  - type: dropdown
+    id: type
+    attributes:
+      label: Tipo
+      options:
+        - Novo script
+        - Melhoria em script existente
+        - Novo alias / função
+        - Documentação
+        - Outro
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Descrição
+      description: O que você gostaria de ver no projeto?
+    validations:
+      required: true
+
+  - type: textarea
+    id: use_case
+    attributes:
+      label: Caso de uso
+      description: Em que situação isso seria útil?
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribuição
+      options:
+        - label: Estou disposto a implementar isso via PR

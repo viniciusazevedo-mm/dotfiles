@@ -17,14 +17,20 @@
  └──────────────────────────────────────────────────────────────┘
 ```
 
+[![ShellCheck](https://github.com/vynazevedo/dotfiles/actions/workflows/shellcheck.yml/badge.svg)](https://github.com/vynazevedo/dotfiles/actions/workflows/shellcheck.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/vynazevedo/dotfiles?style=social)](https://github.com/vynazevedo/dotfiles/stargazers)
+
 [![Shell Script](https://img.shields.io/badge/Shell_Script-%23121011.svg?style=for-the-badge&logo=gnu-bash&logoColor=green)](https://www.gnu.org/software/bash/)
 [![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)](https://www.linux.org/)
 [![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white)](https://ubuntu.com/)
 [![Kali](https://img.shields.io/badge/Kali-268BEE?style=for-the-badge&logo=kalilinux&logoColor=white)](https://www.kali.org/)
 
-**20+ scripts para transformar qualquer Linux numa máquina de guerra.**
+**20+ scripts to turn any Linux box into a productivity machine.** 🇬🇧
 
-*Testado em Ubuntu 22.04+ / 24.04+, Kali Linux e WSL2.*
+**20+ scripts para transformar qualquer Linux numa máquina de guerra.** 🇧🇷
+
+*Tested on Ubuntu 22.04+ / 24.04+, Kali Linux & WSL2.*
 
 ---
 
@@ -58,7 +64,7 @@
 Cada script roda direto via `curl` — instale só o que precisar:
 
 ```bash
-URL="https://raw.githubusercontent.com/vynazevedo/dotfiles/main"
+URL="https://raw.githubusercontent.com/viniciusazevedo-mm/dotfiles/main"
 ```
 
 ```
