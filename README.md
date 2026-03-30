@@ -113,7 +113,7 @@ URL="https://raw.githubusercontent.com/viniciusazevedo-mm/dotfiles/main"
 Ou clone o repo:
 
 ```bash
-git clone https://github.com/vynazevedo/dotfiles.git
+git clone https://github.com/viniciusazevedo-mm/dotfiles.git
 ```
 
 ---
