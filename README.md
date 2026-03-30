@@ -64,8 +64,8 @@ URL="https://raw.githubusercontent.com/vynazevedo/dotfiles/main"
 ```
  ┌─ SHELL & TERMINAL ───────────────────────────────────────────────────────┐
  │                                                                           │
- │  bash <(curl -fsSL $URL/git-boost.sh)              # git aliases         │
- │  bash <(curl -fsSL $URL/zsh.sh)                    # zsh + p10k + tools  │
+ │  bash <(curl -fsSL $URL/scripts/git-boost.sh)              # git aliases         │
+ │  bash <(curl -fsSL $URL/scripts/zsh.sh)                    # zsh + p10k + tools  │
  │  bash <(curl -fsSL $URL/scripts/aliases-extra.sh)   # aliases produtivos  │
  │                                                                           │
  ├─ EDITOR & MULTIPLEXER ──────────────────────────────────────────────────┤
@@ -116,10 +116,9 @@ git clone https://github.com/vynazevedo/dotfiles.git
 
 ```
 dotfiles/
-├── git-boost.sh             # git aliases & config
-├── zsh.sh                   # zsh + oh-my-zsh + p10k
-│
 └── scripts/
+    ├── git-boost.sh         # git aliases & config
+    ├── zsh.sh               # zsh + oh-my-zsh + p10k
     ├── neovim.sh            # neovim + lazy.nvim + LSP
     ├── tmux.sh              # tmux + TPM + tema hacker
     ├── docker.sh            # docker CE + aliases
