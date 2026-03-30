@@ -1,8 +1,8 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # ─────────────────────────────────────────
 # git-boost.sh
 # Git aliases & productivity shortcuts
-# Author: Vinicius Azevedo<github.com/viniciusazevedo-mm>
+# Author: Vinicius Azevedo <github.com/viniciusazevedo-mm>
 # ─────────────────────────────────────────
 
 set -e
@@ -14,28 +14,31 @@ GIT_NAME=$(git config --global user.name 2>/dev/null || echo "")
 GIT_EMAIL=$(git config --global user.email 2>/dev/null || echo "")
 
 if [ -z "$GIT_NAME" ]; then
-  read -p "Seu nome: " GIT_NAME
+  read -rp "Seu nome: " GIT_NAME
   git config --global user.name "$GIT_NAME"
 fi
 
 if [ -z "$GIT_EMAIL" ]; then
-  read -p "Seu e-mail: " GIT_EMAIL
+  read -rp "Seu e-mail: " GIT_EMAIL
   git config --global user.email "$GIT_EMAIL"
 fi
 
 # ─── Configurações gerais ─────────────────────────────────
-git config --global core.editor "nano"
+if ! git config --global core.editor &>/dev/null; then
+  git config --global core.editor "nano"
+fi
 git config --global init.defaultBranch main
 git config --global pull.rebase false
 git config --global color.ui auto
 git config --global rebase.autostash true
 
 # ─── Commit ───────────────────────────────────────────────
-git config --global alias.c      '!git add . && git commit -m'
+git config --global alias.c      'commit -m'
+git config --global alias.ca     '!git add . && git commit -m'
 git config --global alias.cm     'commit -m'
 git config --global alias.amend  'commit --amend --no-edit'
 git config --global alias.reword 'commit --amend'
-git config --global alias.squash '!f(){ git reset --soft HEAD~$1; }; f'
+git config --global alias.squash '!f(){ if [ -z "$1" ] || ! [ "$1" -ge 1 ] 2>/dev/null; then echo "Uso: git squash <N> (N >= 1)"; return 1; fi; git reset --soft HEAD~"$1"; }; f'
 
 # ─── Push / Pull ──────────────────────────────────────────
 git config --global alias.p      'push'
@@ -55,7 +58,7 @@ git config --global alias.co     'checkout'
 git config --global alias.cob    'checkout -b'
 git config --global alias.sw     'switch'
 git config --global alias.swc    'switch -c'
-git config --global alias.cleanup '!git branch --merged | grep -v main | grep -v master | xargs git branch -d'
+git config --global alias.cleanup '!git branch --merged | grep -v main | grep -v master | grep -v "\\*" | xargs git branch -d'
 
 # ─── Stash ────────────────────────────────────────────────
 git config --global alias.ss     'stash'
@@ -64,7 +67,7 @@ git config --global alias.sp     'stash pop'
 # ─── Diff ─────────────────────────────────────────────────
 git config --global alias.d      'diff'
 git config --global alias.ds     'diff --staged'
-git config --global alias.bdiff  '!f(){ git diff $1..$2 -- $3; }; f'
+git config --global alias.bdiff  '!f(){ git diff "$1".."$2" -- "$3"; }; f'
 
 # ─── Utilitários ──────────────────────────────────────────
 git config --global alias.undo   'reset HEAD~1 --mixed'
@@ -77,7 +80,8 @@ echo ""
 echo "Aliases disponíveis:"
 echo ""
 echo "  COMMIT"
-echo "  git c \"msg\"        → add . + commit -m"
+echo "  git c \"msg\"        → commit -m"
+echo "  git ca \"msg\"       → add . + commit -m"
 echo "  git cm \"msg\"       → commit -m"
 echo "  git amend          → adiciona ao último commit"
 echo "  git reword         → edita mensagem do último commit"

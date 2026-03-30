@@ -1,17 +1,46 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # ─────────────────────────────────────────
 # zsh-boost.sh
 # Zsh + Oh My Zsh + Powerlevel10k setup
+# Suporta: Ubuntu 22.04+, Ubuntu 24.04+, Kali Linux
 # Author: Vinicius Azevedo <github.com/viniciusazevedo-mm>
 # ─────────────────────────────────────────
 
 set -e
 
-echo "zsh-boost  configurando terminal..."
+echo "zsh-boost — configurando terminal..."
 
-# ─── Dependncias ─────────────────────────────────────────
+# ─── Detecção de distro e arquitetura ────────────────────
+if [ -f /etc/os-release ]; then
+  # shellcheck disable=SC1091
+  . /etc/os-release
+  DISTRO_ID="${ID}"
+  DISTRO_VERSION="${VERSION_ID:-0}"
+else
+  echo "Erro: /etc/os-release não encontrado."
+  echo "Este script suporta apenas Ubuntu e Kali Linux."
+  exit 1
+fi
+
+ARCH=$(dpkg --print-architecture 2>/dev/null || echo "amd64")
+
+case "$DISTRO_ID" in
+  ubuntu|kali|debian)
+    echo "  Distro detectada: ${PRETTY_NAME}"
+    echo "  Arquitetura: ${ARCH}"
+    ;;
+  *)
+    echo "Aviso: distro '${DISTRO_ID}' não testada. Continuando mesmo assim..."
+    ;;
+esac
+
+has_native_pkg() {
+  apt-cache show "$1" &>/dev/null 2>&1
+}
+
+# ─── Dependências ──────────────────────────────────────────
 echo ""
-echo "Instalando dependncias..."
+echo "Instalando dependências..."
 sudo apt update -q
 sudo apt install -y zsh curl git unzip fontconfig
 
@@ -20,7 +49,7 @@ echo ""
 echo "Instalando Oh My Zsh..."
 
 if [ -d "$HOME/.oh-my-zsh" ]; then
-  echo "  Oh My Zsh j instalado, pulando..."
+  echo "  Oh My Zsh já instalado, pulando..."
 else
   RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 fi
@@ -32,7 +61,7 @@ echo ""
 echo "Instalando Powerlevel10k..."
 
 if [ -d "$ZSH_CUSTOM/themes/powerlevel10k" ]; then
-  echo "  Powerlevel10k j instalado, pulando..."
+  echo "  Powerlevel10k já instalado, pulando..."
 else
   git clone --depth=1 https://github.com/romkatv/powerlevel10k.git \
     "$ZSH_CUSTOM/themes/powerlevel10k"
@@ -42,56 +71,71 @@ fi
 echo ""
 echo "Instalando plugins..."
 
-# zsh-syntax-highlighting
-if [ -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ]; then
-  echo "  zsh-syntax-highlighting j instalado, pulando..."
-else
-  git clone https://github.com/zsh-users/zsh-syntax-highlighting.git \
-    "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting"
-fi
+declare -A PLUGINS=(
+  [zsh-syntax-highlighting]="https://github.com/zsh-users/zsh-syntax-highlighting.git"
+  [zsh-autosuggestions]="https://github.com/zsh-users/zsh-autosuggestions.git"
+  [zsh-completions]="https://github.com/zsh-users/zsh-completions.git"
+)
 
-# zsh-autosuggestions
-if [ -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions" ]; then
-  echo "  zsh-autosuggestions j instalado, pulando..."
-else
-  git clone https://github.com/zsh-users/zsh-autosuggestions.git \
-    "$ZSH_CUSTOM/plugins/zsh-autosuggestions"
-fi
-
-# zsh-completions
-if [ -d "$ZSH_CUSTOM/plugins/zsh-completions" ]; then
-  echo "  zsh-completions j instalado, pulando..."
-else
-  git clone https://github.com/zsh-users/zsh-completions.git \
-    "$ZSH_CUSTOM/plugins/zsh-completions"
-fi
+for plugin in "${!PLUGINS[@]}"; do
+  if [ -d "$ZSH_CUSTOM/plugins/$plugin" ]; then
+    echo "  $plugin já instalado, pulando..."
+  else
+    git clone "${PLUGINS[$plugin]}" "$ZSH_CUSTOM/plugins/$plugin"
+  fi
+done
 
 # ─── Ferramentas visuais ──────────────────────────────────
 echo ""
 echo "Instalando ferramentas..."
-sudo apt install -y btop
 
-# bat  no Ubuntu 24 j vem como bat
-sudo apt install -y bat 2>/dev/null || sudo apt install -y batcat
-# garante que o comando bat funciona
-if command -v batcat &>/dev/null && ! command -v bat &>/dev/null; then
-  mkdir -p ~/.local/bin
-  ln -sf /usr/bin/batcat ~/.local/bin/bat
+# btop
+if command -v btop &>/dev/null; then
+  echo "  btop já instalado, pulando..."
+else
+  sudo apt install -y btop
 fi
 
-# lsd  no est no apt do Ubuntu 24, instala via .deb do GitHub
-echo "  Instalando lsd..."
-LSD_VERSION=$(curl -s https://api.github.com/repos/lsd-rs/lsd/releases/latest | grep tag_name | cut -d'"' -f4)
-curl -fsSL "https://github.com/lsd-rs/lsd/releases/latest/download/lsd_${LSD_VERSION#v}_amd64.deb" \
-  -o /tmp/lsd.deb
-sudo dpkg -i /tmp/lsd.deb
-rm /tmp/lsd.deb
+# bat
+if command -v bat &>/dev/null || command -v batcat &>/dev/null; then
+  echo "  bat já instalado, pulando..."
+else
+  sudo apt install -y bat 2>/dev/null || sudo apt install -y batcat 2>/dev/null || true
+fi
+if command -v batcat &>/dev/null && ! command -v bat &>/dev/null; then
+  mkdir -p ~/.local/bin
+  ln -sf "$(command -v batcat)" ~/.local/bin/bat
+fi
 
-# fastfetch  PPA oficial
+# lsd
+echo "  Instalando lsd..."
+if command -v lsd &>/dev/null; then
+  echo "  lsd já instalado, pulando..."
+elif has_native_pkg lsd; then
+  sudo apt install -y lsd
+else
+  LSD_VERSION=$(curl -s https://api.github.com/repos/lsd-rs/lsd/releases/latest \
+    | grep tag_name | cut -d'"' -f4)
+  LSD_DEB="lsd_${LSD_VERSION#v}_${ARCH}.deb"
+  curl -fsSL "https://github.com/lsd-rs/lsd/releases/latest/download/${LSD_DEB}" \
+    -o "/tmp/${LSD_DEB}"
+  sudo dpkg -i "/tmp/${LSD_DEB}"
+  rm -f "/tmp/${LSD_DEB}"
+fi
+
+# fastfetch
 echo "  Instalando fastfetch..."
-sudo add-apt-repository -y ppa:zhangsongcui3371/fastfetch 2>/dev/null || true
-sudo apt update -q
-sudo apt install -y fastfetch
+if command -v fastfetch &>/dev/null; then
+  echo "  fastfetch já instalado, pulando..."
+elif has_native_pkg fastfetch; then
+  sudo apt install -y fastfetch
+elif [ "$DISTRO_ID" = "ubuntu" ]; then
+  sudo add-apt-repository -y ppa:zhangsongcui3371/fastfetch 2>/dev/null || true
+  sudo apt update -q
+  sudo apt install -y fastfetch
+else
+  echo "  Aviso: fastfetch não disponível nos repositórios. Pulando..."
+fi
 
 # ─── Nerd Font (JetBrainsMono) ────────────────────────────
 echo ""
@@ -101,7 +145,7 @@ FONT_DIR="$HOME/.local/share/fonts"
 mkdir -p "$FONT_DIR"
 
 if fc-list | grep -qi "JetBrainsMono"; then
-  echo "  JetBrainsMono j instalada, pulando..."
+  echo "  JetBrainsMono já instalada, pulando..."
 else
   TMP=$(mktemp -d)
   curl -fsSL https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip \
@@ -112,21 +156,26 @@ else
   echo "  JetBrainsMono Nerd Font instalada!"
 fi
 
-# ─── .zshrc ───────────────────────────────────────────────
+# ─── .zshrc (bloco gerenciado) ────────────────────────────
 echo ""
 echo "Configurando .zshrc..."
 
 ZSHRC="$HOME/.zshrc"
+MARKER_BEGIN="# >>> zsh-boost managed block >>>"
+MARKER_END="# <<< zsh-boost managed block <<<"
 
-# Backup do zshrc atual
-if [ -f "$ZSHRC" ]; then
+touch "$ZSHRC"
+
+if [ -f "$ZSHRC" ] && [ -s "$ZSHRC" ]; then
   cp "$ZSHRC" "$ZSHRC.backup.$(date +%Y%m%d%H%M%S)"
   echo "  Backup salvo em $ZSHRC.backup.*"
 fi
 
-cat > "$ZSHRC" << 'EOF'
+MANAGED_BLOCK=$(cat << 'BLOCK'
 # ─────────────────────────────────────────
-# .zshrc  gerado por zsh-boost.sh
+# .zshrc — bloco gerenciado por zsh-boost.sh
+# Não edite entre os marcadores.
+# Suas customizações vão ABAIXO do bloco.
 # ─────────────────────────────────────────
 
 # Powerlevel10k instant prompt
@@ -153,24 +202,32 @@ source $ZSH/oh-my-zsh.sh
 
 # ─── Aliases ──────────────────────────────────────────────
 
-# Navegao
+# Navegação
 alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
 alias ~='cd ~'
 
-# ls
-alias ls='lsd'
-alias ll='lsd -la'
-alias lt='lsd --tree'
+# ls (lsd se disponível)
+if command -v lsd &>/dev/null; then
+  alias ls='lsd'
+  alias ll='lsd -la'
+  alias lt='lsd --tree'
+else
+  alias ll='ls -la --color=auto'
+fi
 
-# cat
-alias cat='bat'
+# bat — descomente para substituir cat por bat
+# if command -v bat &>/dev/null; then
+#   alias cat='bat'
+# fi
 
 # top
-alias top='btop'
+if command -v btop &>/dev/null; then
+  alias top='btop'
+fi
 
-# Git rpido
+# Git rápido
 alias g='git'
 alias gs='git s'
 alias gl='git l'
@@ -188,11 +245,10 @@ alias py='python3'
 alias serve='python3 -m http.server'
 
 # ─── Exports ──────────────────────────────────────────────
-export EDITOR="nano"
 export PATH="$HOME/.local/bin:$PATH"
 export LANG=en_US.UTF-8
 
-# ─── Histrico ────────────────────────────────────────────
+# ─── Histórico ────────────────────────────────────────────
 HISTSIZE=10000
 SAVEHIST=10000
 setopt HIST_IGNORE_DUPS
@@ -206,16 +262,30 @@ ZSH_AUTOSUGGEST_STRATEGY=(history completion)
 # ─── Powerlevel10k config ─────────────────────────────────
 [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
 
-# ─── Fastfetch no incio ──────────────────────────────────
-# Descomenta pra mostrar info do sistema ao abrir o terminal
+# ─── Fastfetch no início ──────────────────────────────────
+# Descomente para mostrar info do sistema ao abrir o terminal
 # fastfetch
-EOF
+BLOCK
+)
+
+if grep -q "$MARKER_BEGIN" "$ZSHRC" 2>/dev/null; then
+  sed -i "/$MARKER_BEGIN/,/$MARKER_END/d" "$ZSHRC"
+fi
+
+{
+  echo "$MARKER_BEGIN"
+  echo "$MANAGED_BLOCK"
+  echo "$MARKER_END"
+  echo ""
+  cat "$ZSHRC"
+} > "$ZSHRC.tmp" && mv "$ZSHRC.tmp" "$ZSHRC"
+
+echo "  .zshrc configurado (bloco gerenciado inserido)"
 
 # ─── Powerlevel10k hacker config ─────────────────────────
 echo ""
 echo "Aplicando tema hacker no Powerlevel10k..."
 
-# Backup se existir e sobrescreve
 [ -f "$HOME/.p10k.zsh" ] && cp "$HOME/.p10k.zsh" "$HOME/.p10k.zsh.backup.$(date +%Y%m%d%H%M%S)"
 
 cat > "$HOME/.p10k.zsh" << 'P10K'
@@ -269,7 +339,7 @@ cat > "$HOME/.p10k.zsh" << 'P10K'
   typeset -g POWERLEVEL9K_PROMPT_CHAR_{OK,ERROR}_VIINS_CONTENT_EXPANSION='>'
   typeset -g POWERLEVEL9K_PROMPT_CHAR_OVERWRITE_STATE=false
 
-  # Diretorio — verde neon
+  # Diretório — verde neon
   typeset -g POWERLEVEL9K_DIR_FOREGROUND=076
   typeset -g POWERLEVEL9K_SHORTEN_STRATEGY=truncate_to_unique
   typeset -g POWERLEVEL9K_SHORTEN_DELIMITER=
@@ -299,7 +369,7 @@ cat > "$HOME/.p10k.zsh" << 'P10K'
   typeset -g POWERLEVEL9K_STATUS_ERROR_FOREGROUND=196
   typeset -g POWERLEVEL9K_STATUS_ERROR_SIGNAL_FOREGROUND=196
 
-  # Tempo de execucao — so mostra se > 3s
+  # Tempo de execução — só mostra se > 3s
   typeset -g POWERLEVEL9K_COMMAND_EXECUTION_TIME_THRESHOLD=3
   typeset -g POWERLEVEL9K_COMMAND_EXECUTION_TIME_FOREGROUND=101
   typeset -g POWERLEVEL9K_COMMAND_EXECUTION_TIME_FORMAT='d h m s'
@@ -337,10 +407,10 @@ P10K
 
 echo "  .p10k.zsh gerado!"
 
-# ─── Shell padrao ─────────────────────────────────────────
+# ─── Shell padrão ─────────────────────────────────────────
 echo ""
-echo "Definindo Zsh como shell padrao..."
-sudo usermod -s $(which zsh) $USER
+echo "Definindo Zsh como shell padrão..."
+sudo usermod -s "$(command -v zsh)" "$USER"
 
 # ─── Summary ──────────────────────────────────────────────
 echo ""
@@ -348,16 +418,17 @@ echo "zsh-boost instalado com sucesso!"
 echo ""
 echo "O que foi instalado:"
 echo "  - Zsh + Oh My Zsh"
-echo "  - Powerlevel10k (tema hacker pre-configurado)"
+echo "  - Powerlevel10k (tema hacker pré-configurado)"
 echo "  - zsh-syntax-highlighting"
 echo "  - zsh-autosuggestions"
 echo "  - zsh-completions"
 echo "  - btop, lsd, bat, fastfetch"
 echo "  - JetBrainsMono Nerd Font"
 echo ""
-echo "Proximos passos:"
-echo "  1. Configura a fonte 'JetBrainsMono Nerd Font' no seu terminal"
-echo "  2. Roda: exec zsh"
+echo "Próximos passos:"
+echo "  1. Configure a fonte 'JetBrainsMono Nerd Font' no seu terminal"
+echo "  2. Rode: exec zsh"
 echo ""
 echo "  Para ajustar o tema: p10k configure"
-echo "  Para ativar o fastfetch: descomenta a linha no final do ~/.zshrc"
+echo "  Para ativar o fastfetch: descomente a linha no final do ~/.zshrc"
+echo "  Para alias cat=bat: descomente a linha no bloco gerenciado do ~/.zshrc"
